@@ -1,5 +1,5 @@
 {
-  "name": "pattern-matching-ts",
+  "name": "@safe-ts/pattern",
   "version": "1.0.0",
   "description": "",
   "source": "src/index.ts",
