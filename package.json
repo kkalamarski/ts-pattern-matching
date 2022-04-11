@@ -18,6 +18,7 @@
     "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
+    "@parcel/transformer-typescript-types": "^2.4.1",
     "@types/jest": "^27.4.1",
     "jest": "^27.5.1",
     "parcel": "^2.4.1",
