@@ -5,8 +5,28 @@ Pattern matching is a feature built in into many programming languages. Sadly it
 This library aims to implement a pattern matching system that works well with other aspects of TS. It uses Builder Pattern to get all the cases and evaluate them.
 The default case is mandatory.
 
+## Installation
 
+Install it using npm (or yarn).
 
+```bash
+npm install @safe-ts/pattern
+```
+
+It can be imported then in your *.ts files.
+
+```typescript
+
+import match, { AnyNumber, AnyString } from '@safe-ts/pattern'
+
+// (...)
+
+match(x)
+  .case(AnyNumber, () => '...')
+  .case(AnyString, () => '...')
+  .default(() => '...')
+
+```
 ## Comparison with other languages
 ### Scala
 ```scala
