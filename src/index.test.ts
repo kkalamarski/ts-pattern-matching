@@ -1,4 +1,14 @@
-import match, { Any, AnyBoolean, AnyNumber, AnyString } from '.'
+import match, {
+  Any,
+  AnyArray,
+  AnyBoolean,
+  AnyFunction,
+  AnyNumber,
+  AnyObject,
+  AnyString,
+  compose,
+  strict
+} from '.'
 
 const Loading = Symbol('Loading')
 
@@ -15,7 +25,7 @@ describe('Pattern Matching TS', () => {
   })
 
   it('Should be chainable', () => {
-    const v = match<number, string>(1)
+    const v = match<string>(1)
       .case(1, () => 'one')
       .case(2, () => 'two')
       .case(3, () => 'three')
@@ -35,7 +45,7 @@ describe('Pattern Matching TS', () => {
       loading: true
     }
 
-    const v = match<X, string>(x)
+    const v = match<string>(x)
       .case(
         {
           loading: true
@@ -70,7 +80,7 @@ describe('Pattern Matching TS', () => {
         [{}, 'not found']
       ],
       (value, result) => {
-        const v = match<Val, string>(value)
+        const v = match<string>(value)
           .case(
             {
               loading: true
@@ -108,7 +118,7 @@ describe('Pattern Matching TS', () => {
         [{ value: 'any other string' }, 0]
       ],
       (val, res) => {
-        const x = match<{ value: string }, number>(val)
+        const x = match<number>(val)
           .case({ value: 'test' }, () => 1)
           .case({ value: 'test2' }, () => 2)
           .case({ value: 'test3' }, () => 3)
@@ -132,7 +142,7 @@ describe('Pattern Matching TS', () => {
         [Loading, 3]
       ],
       (val, res) => {
-        const x = match<Response, number>(val)
+        const x = match<number>(val)
           .case({ data: 'data' }, () => 1)
           .case({ error: 'error' }, () => 2)
           .case(Loading, () => 3)
@@ -144,42 +154,46 @@ describe('Pattern Matching TS', () => {
   })
 
   describe('should match ANY symbols', () =>
-    testCases<any, number>(
+    testCases<any, string>(
       [
-        [1, 1],
-        ['test', 2],
-        [false, 3],
-        [[], 4]
+        [1, 'number'],
+        ['test', 'string'],
+        [false, 'boolean'],
+        [[1, 2, 3], 'array'],
+        [() => { }, 'function'],
+        [{ test: 1 }, 'object']
       ],
-      (val, res) => {
+      (val, res) =>
         it(`should match ${val} to ${res}`, () => {
-          const x = match<any, number>(val)
-            .case(AnyNumber, () => 1)
-            .case(AnyString, () => 2)
-            .case(AnyBoolean, () => 3)
-            .case(Any, () => 4)
-            .default(() => 5)
+          const x = match(val)
+            .case(AnyNumber, () => 'number')
+            .case(AnyString, () => 'string')
+            .case(AnyBoolean, () => 'boolean')
+            .case(AnyArray, () => 'array')
+            .case(AnyFunction, () => 'function')
+            .case(AnyObject, () => 'object')
+            .default(() => 'default')
 
           expect(x).toBe(res)
         })
-      }
     ))
 
   describe('should match arrays', () =>
     testCases(
       [
         [[1, 2, 3], 'three numbers'],
-        [[1, 2], 'default']
+        [[1, 2], 'any array']
       ],
-      (val, res) => {
+      (val, res) =>
         it(`should match ${val} to ${res}`, () => {
           const x = match(val)
             .case([AnyNumber, AnyNumber, AnyNumber], () => 'three numbers')
+            .case(AnyObject, () => 'should not match')
+            .case(AnyArray, () => 'any array')
             .default(() => 'default')
 
           expect(x).toBe(res)
         })
-      }
     ))
 
   describe('should validate parsed json', () =>
@@ -201,5 +215,93 @@ describe('Pattern Matching TS', () => {
           expect(x).toBe(res)
         })
       }
+    ))
+
+  describe('Should match nested objects', () =>
+    testCases(
+      [
+        [{ a: { b: { c: 5 } } }, 'matched 5'],
+        [{ a: { b: { c: 7 } } }, 'matched any number'],
+        [{ a: { b: { c: 'c' } } }, 'default']
+      ],
+      (val, res) =>
+        it(`should match ${JSON.stringify(val)} to ${res}`, () => {
+          const result = match(val)
+            .case({ a: { b: { c: 5 } } }, () => 'matched 5')
+            .case({ a: { b: { c: AnyNumber } } }, () => 'matched any number')
+            .default(() => 'default')
+
+          expect(result).toBe(res)
+        })
+    ))
+
+  describe('should support matcher functions', () =>
+    testCases<any, string>(
+      [
+        [6, 'greater than 5'],
+        [2, 'less than 5'],
+        [5, 'equal to 5'],
+        [{ test: true }, 'invalid']
+      ],
+      (val, res) =>
+        it(`should match a function to ${res}`, () => {
+          const result = match(val)
+            .case(
+              (x: number) => x > 5,
+              () => 'greater than 5'
+            )
+            .case(
+              (x: number) => x < 5,
+              () => 'less than 5'
+            )
+            .case(
+              (x: number) => x === 5,
+              () => 'equal to 5'
+            )
+            .default(() => 'invalid')
+
+          expect(result).toBe(res)
+        })
+    ))
+
+  describe('should allow composing cases', () =>
+    testCases<any, boolean>(
+      [
+        ['5', false],
+        ['7', false],
+        [4, false],
+        [7, true]
+      ],
+      (val, res) =>
+        it(`should match ${val} to ${res}`, () => {
+          const result = match(val)
+            .case(
+              compose(AnyNumber, (x: number) => x > 5),
+              () => true
+            )
+            .case(
+              compose(AnyNumber, (x: number) => x < 5),
+              () => false
+            )
+            .default(() => false)
+
+          expect(result).toBe(res)
+        })
+    ))
+
+  describe('should allow strict cases', () =>
+    testCases<any, boolean>(
+      [
+        [{ test: 1 }, true],
+        [{ test: 1, test2: 2 }, false]
+      ],
+      (val, res) =>
+        it(`should match ${val} to ${res}`, () => {
+          const result = match(val)
+            .case(strict({ test: 1 }), () => true)
+            .default(() => false)
+
+          expect(result).toBe(res)
+        })
     ))
 })
