@@ -22,7 +22,7 @@ jobs:
     - run: npm ci
     - run: git config --global user.name "GitHub CD bot"
     - run: git config --global user.email "github-cd-bot@example.com"
-    - run: npm version ${{ github.event.release.tag_name }}
+    - run: npm version ${{ github.event.release.tag_name }} -m "🔖 Version %s"
     - run: npm run build
     - run: npm test
     - run: npm publish
