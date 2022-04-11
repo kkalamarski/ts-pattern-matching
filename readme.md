@@ -7,7 +7,8 @@ The default case is mandatory.
 
 
 
-### Comparison with other languages
+## Comparison with other languages
+### Scala
 ```scala
 import scala.util.Random
 
@@ -20,7 +21,7 @@ x match {
   case _ => "other"
 }
 ```
-
+### Elm
 ```elm
 patternMatching : Int -> String
 patternMatching x =
@@ -30,7 +31,7 @@ patternMatching x =
     2 -> "two"
     _ -> "other"
 ```
-
+### Typescript with this library
 ```typescript
 const x = Math.floor(Math.random() * 10);
 
