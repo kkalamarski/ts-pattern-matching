@@ -1,9 +1,45 @@
 # Typescript Pattern Matching
 
-Pattern matching is a feature built in into many programming languages. Sadly it's not included in JavaScript nor TypeScript.
+Pattern matching is a feature built in into many programming languages. Sadly it's not included in JavaScript nor TypeScript. It's like a `switch` statement on steroids, that lets you write a more declarative code.
 
-This library aims to implement a pattern matching system that works well with other aspects of TS.
+This library aims to implement a pattern matching system that works well with other aspects of TS. It uses Builder Pattern to get all the cases and evaluate them.
+The default case is mandatory.
 
+
+
+### Comparison with other languages
+```scala
+import scala.util.Random
+
+val x: Int = Random.nextInt(10)
+
+x match {
+  case 0 => "zero"
+  case 1 => "one"
+  case 2 => "two"
+  case _ => "other"
+}
+```
+
+```elm
+patternMatching : Int -> String
+patternMatching x =
+  case x of
+    0 -> "zero"
+    1 -> "one"
+    2 -> "two"
+    _ -> "other"
+```
+
+```typescript
+const x = Math.floor(Math.random() * 10);
+
+match(x)
+  .case(0, () => 'zero')
+  .case(1, () => 'one')
+  .case(2, () => 'two')
+  .default(() => 'other')
+```
 
 ## Examples
 
@@ -35,3 +71,33 @@ const result = match(anObject)
   .default(() => 'Default state')
 ```
 
+### Typesafe JSON parsing
+
+When parsing JSON strings we do not know if the result will be correctly typed.
+
+```typescript
+interface User {
+  name: string
+  age: number
+}
+
+const jsonString = '{ "definetly": "not an user" }'
+const user = JSON.parse(jsonString) as User
+
+user.name // runtime boom
+```
+
+```typescript
+interface User {
+  name: string
+  age: number
+}
+
+const jsonString = '{ "definetly": "not an user" }'
+
+const user = match<User | null>(JSON.parse(jsonString))
+  .case({ name: AnyString, age: AnyNumber }, (user: unknown) => user as User)
+  .default(() => null)
+
+user && user.name // user will be null if the structure is not right, otherwise it's always guaranteed to be of User type.
+```
