@@ -1,6 +1,6 @@
 {
   "name": "@safe-ts/pattern",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "No dependency pattern matching library created for TypeScript",
   "source": "src/index.ts",
   "main": "dist/main.js",
@@ -10,7 +10,17 @@
     "build": "parcel build",
     "test": "jest"
   },
-  "keywords": ["typescript", "pattern", "safe-ts", "matching", "pattern-matching", "functional", "programming", "ts", "case"],
+  "keywords": [
+    "typescript",
+    "pattern",
+    "safe-ts",
+    "matching",
+    "pattern-matching",
+    "functional",
+    "programming",
+    "ts",
+    "case"
+  ],
   "author": "Krzysztof Kałamarski",
   "license": "MIT",
   "publishConfig": {
